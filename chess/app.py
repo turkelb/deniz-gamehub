@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "chess-secret-" + str(uuid.uuid4()))
 logging.basicConfig(level=logging.INFO)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "YOUR_DEEPSEEK_KEY")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"

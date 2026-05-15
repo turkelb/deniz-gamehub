@@ -1,9 +1,10 @@
 #!/bin/bash
 #===============================================================================
 # Deniz Game Hub - Termux Install Script
-# Run once after cloning: bash install.sh
 #===============================================================================
 set -e
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
 echo "============================================"
 echo " Deniz Game Hub - Termux Kurulum"
 echo "============================================"
@@ -13,23 +14,24 @@ echo ""
 echo "[1/4] Sistem paketleri kuruluyor..."
 pkg update -y -o Dpkg::Options::="--force-confdef" 2>/dev/null
 pkg install -y python python-pip nodejs git wget curl 2>/dev/null
+echo "  Sistem paketleri OK"
 
-# Stockfish (chess engine) - optional, try to install
-echo "[*] Stockfish kuruluyor (santranc AI)..."
-pkg install -y stockfish 2>/dev/null && echo "  Stockfish OK" || echo "  [UYARI] Stockfish bulunamadi - satranc AI calismaz"
+# Optional: Stockfish for chess AI (offline)
+echo "[*] Stockfish (satranc motoru) kuruluyor..."
+pkg install -y stockfish 2>/dev/null && echo "  Stockfish OK" || echo "  [BILGI] Stockfish yok - satrancta AI calismaz"
 
 # ---- Python dependencies ----
 echo ""
 echo "[2/4] Python paketleri kuruluyor..."
-pip install flask flask-socketio python-chess flask-cors 2>/dev/null
+pip install flask flask-socketio flask-cors python-chess 2>/dev/null
 echo "  Python paketleri OK"
 
 # ---- Node.js dependencies ----
 echo ""
 echo "[3/4] Node.js paketleri kuruluyor..."
-cd snake-backend
-npm install --no-audit --no-fund 2>/dev/null
-cd ..
+cd "$DIR/snake-backend"
+npm install 2>/dev/null
+cd "$DIR"
 echo "  Node.js paketleri OK"
 
 # ---- Done ----

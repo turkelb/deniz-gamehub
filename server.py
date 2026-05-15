@@ -10,18 +10,22 @@ class GameHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=DIR, **kwargs)
 
     def do_GET(self):
+        try:
+            self._do_get()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
+    def _do_get(self):
         # Route /snake/* to snake-frontend/
         if self.path.startswith("/snake"):
-            path = self.path[6:] or "/"
-            if path == "/": path = "/index.html"
-            # Remove leading slash for file lookup
-            fpath = os.path.join(DIR, "snake-frontend", path.lstrip("/"))
+            sub = self.path[6:] or "/"
+            if sub == "/":
+                sub = "/index.html"
+            fpath = os.path.join(DIR, "snake-frontend", sub.lstrip("/"))
             if os.path.isfile(fpath):
                 self.send_response(200)
-                ct = "text/html" if fpath.endswith(".html") else \
-                     "text/css" if fpath.endswith(".css") else \
-                     "application/javascript" if fpath.endswith(".js") else \
-                     "application/octet-stream"
+                ext = os.path.splitext(fpath)[1]
+                ct = {"html": "text/html", "css": "text/css", "js": "application/javascript"}.get(ext[1:], "application/octet-stream")
                 self.send_header("Content-Type", ct)
                 self.end_headers()
                 with open(fpath, "rb") as f:
@@ -29,16 +33,17 @@ class GameHandler(http.server.SimpleHTTPRequestHandler):
                 return
             self.send_error(404)
             return
+
         # Route / to www/ (landing page)
-        elif self.path == "/" or self.path.startswith("/?"):
+        if self.path == "/" or self.path.startswith("/?"):
             self.send_response(200)
-            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             with open(os.path.join(DIR, "www", "index.html"), "rb") as f:
                 self.wfile.write(f.read())
             return
-        else:
-            super().do_GET()
+
+        super().do_GET()
 
     def log_message(self, format, *args):
         print(f"[hub] {args[0]}")

@@ -3,7 +3,6 @@ import re
 import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from openai import OpenAI
 import random as _random, socket as _socket
 import random as _random, socket as _socket
 
@@ -15,10 +14,14 @@ CORS(app)
 DEEPSEEK_KEY = "YOUR_DEEPSEEK_KEY"
 GEMINI_KEY = "YOUR_GEMINI_KEY"
 
-deepseek_client = OpenAI(
-    api_key=DEEPSEEK_KEY,
-    base_url="https://api.deepseek.com/v1",
-)
+_openai_available = False
+deepseek_client = None
+try:
+    from openai import OpenAI
+    deepseek_client = OpenAI(api_key=DEEPSEEK_KEY, base_url="https://api.deepseek.com/v1")
+    _openai_available = True
+except ImportError:
+    pass
 
 # ─── Model Registry ───────────────────────────────────────────────────────────
 
@@ -546,7 +549,8 @@ def api_ai_config():
 
 def _call_deepseek(model_id, system_prompt, user_prompt, temperature, max_tokens):
     """Call DeepSeek API (OpenAI-compatible format)."""
-    messages = []
+    if deepseek_client is None:
+        raise RuntimeError("OpenAI kutuphanesi yuklu degil")
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": user_prompt})
