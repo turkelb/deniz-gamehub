@@ -45,9 +45,24 @@ cd "$DIR"
 sleep 2
 echo "OK"
 
-# ---- Get local IP ----
-LOCAL_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}' || ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1 | awk '{print $2}')
-[ -z "$LOCAL_IP" ] && LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+# ---- Get local IP (Termux / Linux / macOS) ----
+LOCAL_IP=""
+# Method 1: ip route (Linux)
+if [ -z "$LOCAL_IP" ]; then
+  LOCAL_IP=$(ip route get 1 2>/dev/null | grep -Eo 'src [0-9.]+' | awk '{print $2}')
+fi
+# Method 2: ip addr (Termux/Android)
+if [ -z "$LOCAL_IP" ]; then
+  LOCAL_IP=$(ip addr show 2>/dev/null | grep -E 'inet [0-9.]+/[0-9]+' | grep -v '127.0.0.1' | head -1 | awk '{print $2}' | cut -d/ -f1)
+fi
+# Method 3: ifconfig
+if [ -z "$LOCAL_IP" ]; then
+  LOCAL_IP=$(ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?[0-9.]+' | grep -Eo '[0-9.]+' | grep -v '127.0.0.1' | head -1)
+fi
+# Method 4: hostname
+if [ -z "$LOCAL_IP" ]; then
+  LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+fi
 [ -z "$LOCAL_IP" ] && LOCAL_IP="localhost"
 
 echo ""
