@@ -51,7 +51,7 @@ const ChessGame = (() => {
 
     // ---- Socket.IO ----
     function connectSocket() {
-        socket = io({ transports: ["websocket", "polling"] });
+        socket = io({ transports: ["polling", "websocket"] });
 
         socket.on("connect", function () {
             console.log("Socket bağlandı:", socket.id);
