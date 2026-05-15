@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Snake Clash.io</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Minimap Canvas -->
+  <canvas id="minimap"></canvas>
+
+  <!-- HUD: Score and Boost -->
+  <div id="hud">
+    <div id="scoreDisplay">
+      <span class="score-label">SKOR</span>
+      <span id="scoreValue">0</span>
+    </div>
+    <div id="lengthDisplay">
+      <span class="score-label">UZUNLUK</span>
+      <span id="lengthValue">0</span>
+    </div>
+    <div id="boostIndicator" class="boost-ready">
+      <span>⚡ BOOST HAZIR</span>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div id="leaderboard">
+    <div class="lb-title">🏆 EN İYİ 10</div>
+    <div id="lbList"></div>
+  </div>
+
+  <!-- Active Power-ups -->
+  <div id="powerUpBar"></div>
+
+  <!-- Kill Feed -->
+  <div id="killFeed"></div>
+
+  <!-- Death Screen -->
+  <div id="deathScreen" class="hidden">
+    <div class="death-content">
+      <h1>💀 ELENDİN!</h1>
+      <div id="deathStats"></div>
+      <div id="aiAnalysis">AI analizi yükleniyor...</div>
+      <button id="respawnBtn">TEKRAR DOĞ</button>
+      <p class="hint">veya ENTER tuşuna bas</p>
+    </div>
+  </div>
+
+  <!-- Start Menu -->
+  <div id="startMenu">
+    <div class="menu-content">
+      <h1 class="game-title">🐍 SNAKE CLASH.io</h1>
+      <p class="subtitle">Ye • Büyü • Avla</p>
+
+      <div class="menu-section">
+        <label>İSMİN</label>
+        <input type="text" id="nameInput" maxlength="20" placeholder="Oyuncu">
+      </div>
+
+      <div class="menu-section">
+        <label>YILAN DESENİ</label>
+        <div id="skinSelector"></div>
+      </div>
+
+      <button id="playBtn" class="play-btn">OYNA</button>
+
+      <div class="controls-info">
+        <p>🖱️ Fare = Yön | 🖱️ Sol Tık / SPACE = Boost</p>
+        <p>📱 Mobil: Dokunmatik kumanda</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Controls -->
+  <div id="mobileControls" class="hidden">
+    <div class="mobile-joystick" id="joystickZone">
+      <div class="joystick-thumb" id="joystickThumb"></div>
+    </div>
+    <button id="mobileBoostBtn" class="mobile-boost">⚡</button>
+  </div>
+
+  <!-- Connection Status -->
+  <div id="connectionStatus" class="hidden">
+    <span></span>
+  </div>
+
+  <script src="/js/socket.io.min.js"></script>
+  <script src="js/skins.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/prediction.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

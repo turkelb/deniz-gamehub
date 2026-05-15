@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deniz'in Oyun Dunyasi</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .stars span { position: absolute; display: block; width: 3px; height: 3px; background: #fff; border-radius: 50%; animation: twinkle 3s infinite alternate; }
+  @keyframes twinkle { to { opacity: 0.2; transform: scale(0.5); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .container { position: relative; z-index: 1; text-align: center; padding: 20px; }
+  .emoji-title { font-size: 3rem; animation: float 2s ease-in-out infinite; display: inline-block; }
+  h1 { font-size: clamp(2rem, 6vw, 4rem); color: #fff; margin-bottom: 10px; text-shadow: 0 0 40px rgba(100,200,255,0.6); }
+  .subtitle { color: #a0c4ff; font-size: 1.2rem; margin-bottom: 20px; }
+  .ip-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 20px; color: #4ecdc4; font-size: 0.85rem; margin-bottom: 30px; display: inline-block; }
+  .games { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; max-width: 900px; }
+  .game-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 30px 25px 20px; width: 220px; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: block; }
+  .game-card:hover { transform: translateY(-8px) scale(1.03); border-color: rgba(255,255,255,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  .game-card.chess:hover  { background: rgba(255,107,107,0.2); border-color: #ff6b6b; }
+  .game-card.checkers:hover { background: rgba(78,205,196,0.2); border-color: #4ecdc4; }
+  .game-card.snake:hover  { background: rgba(69,183,109,0.2); border-color: #45b74d; }
+  .game-icon { font-size: 4.5rem; margin-bottom: 12px; display: block; }
+  .game-name { color: #fff; font-size: 1.4rem; font-weight: bold; margin-bottom: 6px; }
+  .game-desc { color: #8899bb; font-size: 0.85rem; }
+  .footer { color: #556688; font-size: 0.8rem; margin-top: 50px; }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="container">
+  <span class="emoji-title">🎮</span>
+  <h1>Deniz'in Oyun Dunyasi</h1>
+  <p class="subtitle">✨ Oynamak istedigin oyuna tikla! ✨</p>
+  <div class="ip-box" id="ipInfo">📡 Wi-Fi IP: <b>YUKLENIYOR...</b></div>
+  <div class="games">
+    <a href="http://SERVER_IP:5000" class="game-card chess" id="chessLink">
+      <span class="game-icon">♟️</span>
+      <div class="game-name">Satranc</div>
+      <div class="game-desc">Hamleni yap, tahtayi fethet!</div>
+    </a>
+    <a href="http://SERVER_IP:5001" class="game-card checkers" id="damaLink">
+      <span class="game-icon">🔴</span>
+      <div class="game-name">Dama</div>
+      <div class="game-desc">Taslarini sırala, kazan!</div>
+    </a>
+    <a href="http://SERVER_IP:8080" class="game-card snake" id="snakeLink">
+      <span class="game-icon">🐍</span>
+      <div class="game-name">Yilan</div>
+      <div class="game-desc">Elmalari topla, buyu!</div>
+    </a>
+  </div>
+  <p class="footer">🚀 Deniz icin ozel tasarlandi — Iyi eglenceler! 🌟</p>
+</div>
+<script>
+let stars=''; for(let i=0;i<80;i++) stars+=`<span style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;opacity:${0.3+Math.random()*0.7}"></span>`;
+document.getElementById('stars').innerHTML=stars;
+
+function getLocalIP() {
+  return new Promise((resolve) => {
+    try {
+      const pc = new RTCPeerConnection({iceServers:[]});
+      pc.createDataChannel('');
+      pc.createOffer().then(o => pc.setLocalDescription(o));
+      pc.onicecandidate = (e) => {
+        if (!e.candidate) { pc.close(); resolve('localhost'); return; }
+        const ip = e.candidate.candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/);
+        if (ip) { pc.close(); resolve(ip[0]); }
+      };
+      setTimeout(() => { pc.close(); resolve('localhost'); }, 2000);
+    } catch(e) { resolve('localhost'); }
+  });
+}
+
+getLocalIP().then(ip => {
+  document.getElementById('ipInfo').innerHTML = '📡 Bu Wi-Fi agina baglan: <b>http://' + ip + ':8080</b><br><small style="color:#8899bb">Telefonun tarayicisindan bu adresi ac</small>';
+  document.querySelectorAll('a').forEach(a => a.href = a.href.replace('SERVER_IP', ip));
+});
+</script>
+</body>
+</html>

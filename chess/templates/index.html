@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess - AI Satranç & Online</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟️</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">&#9822;</span>
+                <h1>Chess</h1>
+            </div>
+            <span class="badge">AI + Online</span>
+        </header>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="pvp" title="Aynı cihazda iki oyuncu">
+                <span class="mode-icon">&#9819;&#9813;</span>
+                <span>PvP</span>
+            </button>
+            <button class="mode-btn" data-mode="pve" title="AI'ya karşı oyna">
+                <span class="mode-icon">&#129302;</span>
+                <span>PvE (AI)</span>
+            </button>
+            <button class="mode-btn" data-mode="online" title="İnternet üzerinden arkadaşına karşı">
+                <span class="mode-icon">&#127760;</span>
+                <span>Online</span>
+            </button>
+            <button class="mode-btn" data-mode="analysis" title="Serbest tahta analizi">
+                <span class="mode-icon">&#128270;</span>
+                <span>Analiz</span>
+            </button>
+        </div>
+
+        <div id="model-selector" class="model-selector hidden">
+            <div class="selector-row">
+                <label class="model-label">AI Model:</label>
+                <select id="provider-select" class="model-dropdown"></select>
+                <select id="model-select" class="model-dropdown"></select>
+                <span id="model-info" class="model-info"></span>
+            </div>
+            <div id="style-temp-row" class="selector-row">
+                <label class="model-label">Stil:</label>
+                <select id="style-select" class="model-dropdown style-dropdown"></select>
+                <span class="help-icon" id="style-help" title="Stil hakkında bilgi">?</span>
+                <label class="model-label">Sıcaklık:</label>
+                <input type="range" id="temperature-slider" class="temperature-slider" min="0" max="2" step="0.1" value="0">
+                <span id="temperature-value" class="model-info">0.0</span>
+                <span class="help-icon" id="temp-help" title="Sıcaklık hakkında bilgi">?</span>
+            </div>
+            <div id="settings-info" class="settings-info hidden">
+                <span id="settings-info-text"></span>
+            </div>
+            <div class="selector-row">
+                <label class="toggle-label beginner-toggle">
+                    <input type="checkbox" id="beginner-toggle">
+                    <span class="toggle-track">
+                        <span class="toggle-knob"></span>
+                    </span>
+                    <span class="toggle-text" style="color:#00d68f;">🎓 Sıfırdan Satranç</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="online-panel" class="online-panel hidden">
+            <div id="online-setup" class="online-setup">
+                <button id="create-room-btn" class="online-action-btn">
+                    <span>&#127760;</span> Yeni Oyun Oluştur
+                </button>
+                <div class="online-divider">
+                    <span>veya</span>
+                </div>
+                <div class="join-room-group">
+                    <input type="text" id="join-code-input" class="join-code-input" placeholder="Oda kodu (örn: ABCD)" maxlength="4" autocomplete="off">
+                    <button id="join-room-btn" class="online-action-btn secondary">Oyuna Katıl</button>
+                </div>
+            </div>
+
+            <div id="online-active" class="online-active hidden">
+                <div class="room-info">
+                    <div class="room-code-group">
+                        <span class="room-label">Oda Kodu:</span>
+                        <span id="room-code-display" class="room-code"></span>
+                        <button id="copy-code-btn" class="copy-btn" title="Kopyala">📋</button>
+                    </div>
+                    <div id="connection-indicator" class="connection-indicator">
+                        <span class="conn-dot"></span>
+                        <span id="conn-text">Bekleniyor...</span>
+                    </div>
+                </div>
+                <div class="player-indicators">
+                    <div id="white-indicator" class="player-indicator">
+                        <span class="pi-dot white"></span>
+                        <span class="pi-label">Beyaz (Sen)</span>
+                    </div>
+                    <div id="black-indicator" class="player-indicator">
+                        <span class="pi-dot black"></span>
+                        <span class="pi-label">Siyah</span>
+                    </div>
+                </div>
+                <div class="voice-controls">
+                    <button id="mic-btn" class="mic-btn" title="Sesli sohbeti başlat">
+                        <span id="mic-icon">🎤</span>
+                        <span id="mic-text">Sesli Sohbet</span>
+                    </button>
+                    <span id="voice-status" class="voice-status hidden"></span>
+                </div>
+                <button id="leave-room-btn" class="leave-btn">Oyundan Ayrıl</button>
+            </div>
+        </div>
+
+        <div id="reconnect-banner" class="reconnect-banner hidden">
+            <span>💾 Devam eden bir oyunun var (<span id="reconnect-code"></span>).</span>
+            <button id="reconnect-btn" class="reconnect-btn">Yeniden Bağlan</button>
+            <button id="forget-btn" class="forget-btn">Unut</button>
+        </div>
+
+        <main class="main">
+            <div class="board-container">
+                <div id="board" class="chessboard"></div>
+                <div class="board-controls">
+                    <button id="undo-btn" class="ctrl-btn" title="Hamleyi geri al">
+                        <span>&#8630;</span> Geri Al
+                    </button>
+                    <button id="new-game-btn" class="ctrl-btn" title="Yeni oyun başlat">
+                        <span>&#8635;</span> Yeni Oyun
+                    </button>
+                    <button id="flip-btn" class="ctrl-btn" title="Tahtayı çevir">
+                        <span>&#8645;</span> Çevir
+                    </button>
+                    <div class="sound-toggle">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="sound-toggle" checked>
+                            <span class="toggle-track">
+                                <span class="toggle-knob"></span>
+                            </span>
+                            <span class="toggle-text">Ses</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="panel status-panel">
+                    <h3>Durum</h3>
+                    <div id="status-text" class="status-text">Beyaz oynuyor</div>
+                    <div id="ai-thinking" class="ai-thinking hidden">
+                        <span class="spinner"></span> AI düşünüyor...
+                    </div>
+                </div>
+
+                <div id="ai-explanation" class="panel ai-panel hidden">
+                    <h3>&#129302; AI Açıklaması</h3>
+                    <p id="ai-text"></p>
+                </div>
+
+                <div id="beginner-tips" class="panel beginner-panel hidden">
+                    <h3>&#127891; Öğretici İpuçları</h3>
+                    <div id="tips-content" class="tips-content"></div>
+                </div>
+
+                <div class="panel history-panel">
+                    <h3>Hamle Geçmişi (PGN)</h3>
+                    <div id="pgn-display" class="pgn-display">Henüz hamle yapılmadı.</div>
+                </div>
+
+                <div class="panel captured-panel">
+                    <h3>Alınan Taşlar</h3>
+                    <div class="captured-row">
+                        <div class="captured-group">
+                            <span class="captured-label">Beyaz aldı:</span>
+                            <span id="captured-by-white" class="captured-pieces"></span>
+                        </div>
+                        <div class="captured-group">
+                            <span class="captured-label">Siyah aldı:</span>
+                            <span id="captured-by-black" class="captured-pieces"></span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.12.1/chess.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/static/js/game.js"></script>
+</body>
+</html>

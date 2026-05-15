@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Türk Daması - DeepSeek AI</title>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --surface2: #0f3460;
+  --text: #e0e0e0;
+  --text-dim: #a0a0a0;
+  --accent: #e94560;
+  --accent2: #00b4d8;
+  --cell-light: #d4a574;
+  --cell-dark: #7a4b2a;
+  --cell-highlight: #f0e68c;
+  --cell-selected: #90ee90;
+  --cell-legal: rgba(144, 238, 144, 0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+header {
+  width: 100%;
+  max-width: 900px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 {
+  font-size: 1.3rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.mode-selector {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 3px;
+}
+.mode-selector button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.mode-selector button.active {
+  background: var(--accent);
+  color: white;
+}
+main {
+  display: flex;
+  gap: 20px;
+  max-width: 900px;
+  width: 100%;
+  padding: 0 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.board-container {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+.info-panel {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+.info-panel h3 {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--surface2);
+  border-radius: 8px;
+}
+.turn-indicator .dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+.turn-indicator .dot.white { background: #f0f0f0; color: #333; }
+.turn-indicator .dot.black { background: #222; color: #eee; border: 2px solid #555; }
+.captured-box {
+  display: flex;
+  gap: 16px;
+}
+.captured-box div {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  background: var(--surface2);
+  border-radius: 8px;
+}
+.captured-box .count {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.ai-explanation {
+  font-size: 0.82rem;
+  color: var(--accent2);
+  padding: 8px;
+  background: var(--surface2);
+  border-radius: 8px;
+  min-height: 40px;
+  line-height: 1.4;
+}
+.move-history {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.move-history .move {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--surface2);
+  font-family: monospace;
+}
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.buttons button {
+  flex: 1;
+  min-width: 70px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.btn-undo { background: var(--surface2); color: var(--text); }
+.btn-new { background: var(--accent); color: white; }
+.btn-undo:hover { background: #1a4a7a; }
+.btn-new:hover { background: #d63850; }
+.btn-undo:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* AI Config Panel */
+.ai-config {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-config.visible { display: flex; }
+.ai-config label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: -6px;
+}
+.ai-config select, .ai-config input[type="range"] {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.ai-config select:focus { outline: 1px solid var(--accent2); }
+.temp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.temp-row input[type="range"] { flex: 1; }
+.temp-value {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--accent2);
+  min-width: 32px;
+  text-align: center;
+}
+.color-picker {
+  display: flex;
+  gap: 6px;
+}
+.color-picker button {
+  flex: 1;
+  padding: 6px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.2s;
+}
+.color-picker button.white-btn { background: #f0f0f0; color: #333; }
+.color-picker button.black-btn { background: #222; color: #eee; }
+.color-picker button.selected { border-color: var(--accent); }
+
+/* Board */
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 54px);
+  grid-template-rows: repeat(8, 54px);
+  gap: 1px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.cell {
+  width: 54px; height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+.cell.light { background: var(--cell-light); }
+.cell.dark { background: var(--cell-dark); }
+.cell.selected { box-shadow: inset 0 0 0 3px var(--cell-selected); }
+.cell.legal::after {
+  content: '';
+  width: 14px; height: 14px;
+  background: var(--cell-legal);
+  border-radius: 50%;
+  position: absolute;
+}
+.cell.last-from { box-shadow: inset 0 0 0 2px rgba(255,255,200,0.6); }
+.cell.last-to { box-shadow: inset 0 0 0 2px rgba(144,238,144,0.6); }
+
+.cell.selected .piece { transform: scale(1.1); }
+
+.coord-label {
+  position: absolute;
+  font-size: 0.55rem;
+  pointer-events: none;
+  opacity: 0.5;
+  color: white;
+  bottom: 1px; right: 2px;
+}
+.cell.light .coord-label { color: #333; }
+
+.game-over-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.game-over-dialog {
+  background: var(--surface);
+  padding: 32px;
+  border-radius: 16px;
+  text-align: center;
+  border: 2px solid var(--accent);
+}
+.game-over-dialog h2 { margin-bottom: 16px; color: var(--accent); }
+.game-over-dialog button {
+  margin-top: 12px;
+  padding: 10px 28px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+@media (max-width: 720px) {
+  main { flex-direction: column; align-items: center; }
+  .info-panel { width: 100%; max-width: 450px; }
+  .board { grid-template-columns: repeat(8, 40px); grid-template-rows: repeat(8, 40px); }
+  .cell { width: 40px; height: 40px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♟ Türk Daması</h1>
+  <div class="mode-selector">
+    <button data-mode="pvp" class="active">👥 İki Kişilik</button>
+    <button data-mode="pve">🤖 Bilgisayar</button>
+    <button data-mode="analyze">🔍 Analiz</button>
+  </div>
+</header>
+
+<main>
+  <div class="board-container">
+    <div class="board" id="board"></div>
+  </div>
+  <div class="info-panel">
+    <div class="turn-indicator">
+      <div class="dot" id="turn-dot"></div>
+      <span id="turn-text">Sıra: Beyaz</span>
+    </div>
+    <h3>Yenilen Taşlar</h3>
+    <div class="captured-box">
+      <div>○ <span class="count" id="cap-white">0</span><br><small>Beyaz yedi</small></div>
+      <div>● <span class="count" id="cap-black">0</span><br><small>Siyah yedi</small></div>
+    </div>
+    <div class="ai-config" id="ai-config">
+      <label>Yapay Zeka Modeli</label>
+      <select id="ai-model">
+        <option value="deepseek-v4-pro">DeepSeek V4 Pro - Hızlı & Güçlü</option>
+        <option value="deepseek-reasoner">DeepSeek Reasoner - Derin Düşünme</option>
+        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite - Hafif</option>
+      </select>
+      <label>Sıcaklık (Temperature)</label>
+      <div class="temp-row">
+        <input type="range" id="ai-temp" min="0" max="1" step="0.1" value="0.3">
+        <span class="temp-value" id="ai-temp-val">0.3</span>
+      </div>
+      <label>Oyun Tarzı</label>
+      <select id="ai-style">
+        <option value="balanced">Dengeli</option>
+        <option value="aggressive">Agresif</option>
+        <option value="defensive">Savunmacı</option>
+        <option value="surprise">Sürpriz</option>
+        <option value="educational">Öğretici</option>
+      </select>
+      <label>Renginiz</label>
+      <div class="color-picker" id="color-picker">
+        <button class="white-btn selected" data-color="w">○ Beyaz</button>
+        <button class="black-btn" data-color="b">● Siyah</button>
+      </div>
+    </div>
+    <div class="ai-explanation" id="ai-explain">AI açıklaması burada görünür</div>
+    <h3>Hamle Geçmişi</h3>
+    <div class="move-history" id="move-history">
+      <div style="color:var(--text-dim)">Henüz hamle yapılmadı</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-undo" id="btn-undo" disabled>↩ Geri Al</button>
+      <button class="btn-new" id="btn-new">🔄 Yeni Oyun</button>
+    </div>
+  </div>
+</main>
+
+<script src="/js/game.js"></script>
+</body>
+</html>
