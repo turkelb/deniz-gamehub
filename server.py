@@ -16,6 +16,13 @@ class GameHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
     def _do_get(self):
+        # Route /snake to /snake/ (browser needs trailing slash for relative URLs)
+        if self.path == "/snake":
+            self.send_response(301)
+            self.send_header("Location", "/snake/")
+            self.end_headers()
+            return
+
         # Route /snake/* to snake-frontend/
         if self.path.startswith("/snake"):
             sub = self.path[6:] or "/"
