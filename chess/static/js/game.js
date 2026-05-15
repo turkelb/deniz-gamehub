@@ -36,7 +36,7 @@ const ChessGame = (() => {
             onDrop: onDrop,
             onDragStart: onDragStart,
             onMouseoutSquare: onMouseoutSquare,
-            pieceTheme: "https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png",
+            pieceTheme: "/static/img/chesspieces/wikipedia/{piece}.png",
             showNotation: true,
         });
 
