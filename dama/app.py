@@ -740,4 +740,4 @@ En iyi hamlenin NUMARASINI (#) seç. Yanıtı şu JSON ver, başka metin ekleme:
 
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5001)
+    socketio.run(app, host="0.0.0.0", port=5001, allow_unsafe_werkzeug=True)
