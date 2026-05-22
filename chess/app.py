@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import re
 import json
@@ -8,7 +11,6 @@ import string
 import logging
 import subprocess
 import threading
-import eventlet
 import chess
 import requests
 from flask import Flask, render_template, request, jsonify
