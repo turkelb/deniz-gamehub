@@ -23,7 +23,7 @@ pkg install -y stockfish 2>/dev/null && echo "  Stockfish OK" || echo "  [BILGI]
 # ---- Python dependencies ----
 echo ""
 echo "[2/4] Python paketleri kuruluyor..."
-pip install flask flask-socketio flask-cors python-chess eventlet 2>/dev/null
+pip install flask flask-socketio flask-cors python-chess simple-websocket 2>/dev/null
 echo "  Python paketleri OK"
 
 # ---- Node.js dependencies ----
