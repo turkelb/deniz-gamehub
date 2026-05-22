@@ -21,7 +21,7 @@ echo "OK"
 # ---- Chess (port 5000) ----
 echo -n "[2] Satranc (5000)... "
 cd "$DIR/chess"
-python3 app.py --port 5000 --host 0.0.0.0 &
+python3 app.py &
 echo $! > "$PIDDIR/chess.pid"
 cd "$DIR"
 sleep 2
@@ -30,7 +30,7 @@ echo "OK"
 # ---- Dama (port 5001) ----
 echo -n "[3] Dama (5001)... "
 cd "$DIR/dama"
-python3 app.py --port 5001 --host 0.0.0.0 &
+python3 app.py &
 echo $! > "$PIDDIR/dama.pid"
 cd "$DIR"
 sleep 2

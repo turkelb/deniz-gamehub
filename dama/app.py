@@ -1,13 +1,15 @@
 import json
 import re
 import requests
+import eventlet
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import random as _random, socket as _socket
+from flask_socketio import SocketIO
 import random as _random, socket as _socket
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 # ─── API Clients ──────────────────────────────────────────────────────────────
 
@@ -739,4 +741,4 @@ En iyi hamlenin NUMARASINI (#) seç. Yanıtı şu JSON ver, başka metin ekleme:
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=False)
+    socketio.run(app, host="0.0.0.0", port=5001)

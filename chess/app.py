@@ -8,6 +8,7 @@ import string
 import logging
 import subprocess
 import threading
+import eventlet
 import chess
 import requests
 from flask import Flask, render_template, request, jsonify
@@ -17,7 +18,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "chess-secret-" + str(uuid.uuid4()))
 logging.basicConfig(level=logging.INFO)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "YOUR_DEEPSEEK_KEY")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
@@ -824,4 +825,4 @@ def validate_move():
 
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=5000)
